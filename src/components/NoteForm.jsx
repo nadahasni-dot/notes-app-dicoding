@@ -66,8 +66,7 @@ export default class NoteForm extends Component {
             id="title"
             className="note-input__title"
             value={this.state.title}
-            onChange={this.handleChange}
-            maxLength={50}
+            onChange={this.handleChange}            
             placeholder="Ini adalah judul ..."
             required
           />
