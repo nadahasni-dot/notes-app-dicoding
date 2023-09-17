@@ -3,6 +3,7 @@ import { getInitialData, notesCollection } from "../utils";
 import NavBar from "./NavBar";
 import NoteBody from "./NoteBody";
 import NoteForm from "./NoteForm";
+import NoteList from "./NoteList";
 
 export default class PersonalNotesApp extends Component {
   constructor(props) {
@@ -17,6 +18,7 @@ export default class PersonalNotesApp extends Component {
     this.handleSearchNote = this.handleSearchNote.bind(this);
     this.handleSubmitNote = this.handleSubmitNote.bind(this);
     this.handleDeleteNote = this.handleDeleteNote.bind(this);
+    this.handleModifyNoteStatus = this.handleModifyNoteStatus.bind(this);
   }
 
   getFilteredNotes() {
@@ -48,11 +50,28 @@ export default class PersonalNotesApp extends Component {
     });
   }
 
-  handleDeleteNote(deletedNote) {
+  handleDeleteNote(id) {
     const currentNotes = this.state.notes;
-    const newCollections = currentNotes.filter(
-      (note) => note.id !== deletedNote.id
-    );
+    const newCollections = currentNotes.filter((note) => note.id !== id);
+
+    localStorage.setItem(notesCollection, JSON.stringify(newCollections));
+
+    this.setState(() => {
+      return {
+        notes: newCollections,
+      };
+    });
+  }
+
+  handleModifyNoteStatus(id) {
+    const currentNotes = this.state.notes;
+    const newCollections = currentNotes.map((note) => {
+      if (note.id === id) {
+        return { ...note, archived: !note.archived };
+      }
+
+      return note;
+    });
 
     localStorage.setItem(notesCollection, JSON.stringify(newCollections));
 
@@ -64,6 +83,8 @@ export default class PersonalNotesApp extends Component {
   }
 
   render() {
+    const filteredNotes = this.getFilteredNotes();
+
     return (
       <>
         <NavBar
@@ -72,6 +93,20 @@ export default class PersonalNotesApp extends Component {
         />
         <NoteBody>
           <NoteForm onSubmit={this.handleSubmitNote} />
+          <NoteList
+            title="Catatan Aktif"
+            isArchived={false}
+            notes={filteredNotes}
+            onDelete={this.handleDeleteNote}
+            onModifyStatus={this.handleModifyNoteStatus}
+          />
+          <NoteList
+            title="Arsip"
+            isArchived={true}
+            notes={filteredNotes}
+            onDelete={this.handleDeleteNote}
+            onModifyStatus={this.handleModifyNoteStatus}
+          />
         </NoteBody>
       </>
     );
